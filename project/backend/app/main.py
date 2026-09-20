@@ -1,8 +1,3 @@
-@app.get("/")
-def read_root():
-    return {"status": "healthy", "message": "Smart Agri Surveillance API is live!"}
-
-
 import asyncio
 import logging
 
@@ -47,18 +42,31 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 async def on_startup():
     logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
 
-    init_db()
-    seed_defaults()
+    # Initialize local SQLite DB safely
+    try:
+        init_db()
+        seed_defaults()
+    except Exception as e:
+        logger.error(f"Database init skipped or failed: {e}")
 
-    load_detector()
-    from app.detection.registry import get_load_error
-    if get_load_error():
-        logger.warning("YOLO model failed to load: %s", get_load_error())
-    else:
-        logger.info("YOLO model loaded from %s", settings.resolved_model_path)
+    # Prevent YOLO model loading crashes on Serverless architectures
+    try:
+        load_detector()
+        from app.detection.registry import get_load_error
+        if get_load_error():
+            logger.warning("YOLO model failed to load: %s", get_load_error())
+        else:
+            logger.info("YOLO model loaded from %s", settings.resolved_model_path)
+    except Exception as e:
+        logger.warning(f"Model loading bypassed for serverless compatibility: {e}")
 
-    loop = asyncio.get_event_loop()
-    app.state.stream_manager = StreamManager(loop)
+    # Safe stream manager fallback
+    try:
+        loop = asyncio.get_event_loop()
+        app.state.stream_manager = StreamManager(loop)
+    except Exception as e:
+        logger.warning(f"Stream manager initialization skipped: {e}")
+        
     logger.info("Backend ready.")
 
 
@@ -80,10 +88,13 @@ app.include_router(system.router)
 app.include_router(video_analysis.router)
 app.include_router(websocket_router)
 
-# Serve saved snapshots/recordings directly (read-only, local network use).
-app.mount("/storage", StaticFiles(directory=str(settings.storage_dir)), name="storage")
+# Safe storage mount setup
+try:
+    app.mount("/storage", StaticFiles(directory=str(settings.storage_dir)), name="storage")
+except Exception:
+    logger.warning("Storage directory mounting skipped or unavailable.")
 
 
 @app.get("/")
-def root():
-    return {"name": settings.APP_NAME, "version": settings.APP_VERSION, "status": "running"}
+def read_root():
+    return {"status": "healthy", "message": "Smart Agri Surveillance API is live!"}
