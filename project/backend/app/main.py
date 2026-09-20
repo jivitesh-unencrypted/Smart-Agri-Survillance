@@ -1,3 +1,8 @@
+@app.get("/")
+def read_root():
+    return {"status": "healthy", "message": "Smart Agri Surveillance API is live!"}
+
+
 import asyncio
 import logging
 
