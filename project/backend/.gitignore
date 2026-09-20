@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+database/*.db
+database/.camera_key
+storage/snapshots/**
+storage/recordings/**
+!storage/snapshots/.gitkeep
+!storage/recordings/.gitkeep
