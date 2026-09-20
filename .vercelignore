@@ -6,3 +6,7 @@ node_modules/
 __pycache__/
 *.pyc
 .git/
+*.pt
+*.onnx
+*.h5
+project/backend/models/
