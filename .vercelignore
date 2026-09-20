@@ -1,0 +1,8 @@
+project/backend/venv/
+project/backend/.venv/
+venv/
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.git/
