@@ -1,5 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-export const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws'
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://smart-agri-survillance-api.onrender.com'
+
+export const WS_URL =
+  import.meta.env.VITE_WS_URL ||
+  'wss://smart-agri-survillance-api.onrender.com/ws'
 
 export function getToken() {
   return localStorage.getItem('access_token')
