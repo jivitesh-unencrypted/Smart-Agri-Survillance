@@ -9,6 +9,7 @@ class DetectionOut(BaseModel):
     source: str
     camera_id: Optional[int] = None
     camera_name: Optional[str] = None
+    video_analysis_job_id: Optional[int] = None
     location: Optional[str] = None
     object_name: str
     category: str

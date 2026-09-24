@@ -24,6 +24,7 @@ def list_detections(
     category: Optional[str] = None,
     severity: Optional[str] = None,
     camera_id: Optional[int] = None,
+    video_analysis_job_id: Optional[int] = None,
     date_from: Optional[datetime] = None,
     date_to: Optional[datetime] = None,
     search: Optional[str] = None,
@@ -37,6 +38,11 @@ def list_detections(
         q = q.filter(Detection.severity == severity)
     if camera_id:
         q = q.filter(Detection.camera_id == camera_id)
+    if video_analysis_job_id:
+        # Scope to ONE video-analysis job's results only - without this,
+        # "View" from a job row would pull in every other video job's
+        # detections too (they all share source="Video Analysis").
+        q = q.filter(Detection.video_analysis_job_id == video_analysis_job_id)
     if date_from:
         q = q.filter(Detection.created_at >= date_from)
     if date_to:

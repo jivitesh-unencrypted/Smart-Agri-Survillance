@@ -41,6 +41,11 @@ export default function VideoAnalysis() {
 
   const handleFile = async (file) => {
     if (!file) return
+    // Guard against a second upload firing while one is already in
+    // flight (double-click, drag-drop while the picker dialog is
+    // still resolving, etc.) - without this, two uploads could race
+    // to create two jobs from what the user thought was one click.
+    if (uploading) return
     const allowed = ['.mp4', '.avi', '.mov', '.mkv', '.webm', '.m4v']
     const ext = '.' + (file.name.split('.').pop() || '').toLowerCase()
     if (!allowed.includes(ext)) {
@@ -80,15 +85,16 @@ export default function VideoAnalysis() {
       </div>
 
       <div
-        className={`card border-dashed border-2 text-center py-10 transition-colors cursor-pointer ${
-          dragOver ? 'border-brand-500 bg-brand-500/5' : 'border-slate-700'
-        }`}
-        onClick={() => fileInputRef.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+        className={`card border-dashed border-2 text-center py-10 transition-colors ${
+          uploading ? 'opacity-60 cursor-not-allowed pointer-events-none' : 'cursor-pointer'
+        } ${dragOver ? 'border-brand-500 bg-brand-500/5' : 'border-slate-700'}`}
+        onClick={() => { if (!uploading) fileInputRef.current?.click() }}
+        onDragOver={(e) => { e.preventDefault(); if (!uploading) setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
           e.preventDefault()
           setDragOver(false)
+          if (uploading) return
           const file = e.dataTransfer.files?.[0]
           if (file) handleFile(file)
         }}
@@ -98,6 +104,7 @@ export default function VideoAnalysis() {
           type="file"
           accept=".mp4,.avi,.mov,.mkv,.webm,.m4v"
           className="hidden"
+          disabled={uploading}
           onChange={(e) => handleFile(e.target.files?.[0])}
         />
         {uploading ? (
@@ -122,7 +129,10 @@ export default function VideoAnalysis() {
           <div className="space-y-2">
             {jobs.map((job) => (
               <JobRow key={job.id} job={job} onCancel={handleCancel} onViewDetections={() =>
-                navigate(`/detections?source=${encodeURIComponent('Video Analysis')}`)
+                // Scope to THIS job's id, not just source="Video Analysis" -
+                // otherwise every other video job's detections (past and
+                // future) would show up mixed in together.
+                navigate(`/detections?source=${encodeURIComponent('Video Analysis')}&job_id=${job.id}&job_name=${encodeURIComponent(job.original_filename)}`)
               } />
             ))}
           </div>

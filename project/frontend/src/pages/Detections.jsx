@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
+<<<<<<< HEAD
 import { Search, Download, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react'
+=======
+import { Search, Download, ChevronLeft, ChevronRight, ImageOff, X } from 'lucide-react'
+>>>>>>> ce1420a (Video analysis feature Fixed)
 import { api, mediaUrl } from '../lib/api'
 import { formatDateTime, formatDuration, categoryColor, severityColor } from '../lib/utils'
 import KpiCard from '../components/KpiCard.jsx'
@@ -9,7 +13,11 @@ const CATEGORIES = ['Human', 'Animals', 'Vehicles', 'Others']
 const SEVERITIES = ['critical', 'warning', 'info', 'normal']
 
 export default function Detections() {
+<<<<<<< HEAD
   const [searchParams] = useSearchParams()
+=======
+  const [searchParams, setSearchParams] = useSearchParams()
+>>>>>>> ce1420a (Video analysis feature Fixed)
   const [items, setItems] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -18,8 +26,21 @@ export default function Detections() {
   const [cameras, setCameras] = useState([])
   const [preview, setPreview] = useState(null)
 
+<<<<<<< HEAD
   const [filters, setFilters] = useState({
     source: searchParams.get('source') || '', category: '', severity: '', camera_id: '', search: '',
+=======
+  // job_id comes from "View" on a specific Video Analysis job row - it
+  // scopes results to exactly that job so a previous/other job's
+  // detections never bleed into this view. job_name is display-only,
+  // passed along from the job row so we don't need an extra fetch.
+  const jobId = searchParams.get('job_id') || ''
+  const jobName = searchParams.get('job_name') || ''
+
+  const [filters, setFilters] = useState({
+    source: searchParams.get('source') || '', category: '', severity: '', camera_id: '',
+    video_analysis_job_id: jobId, search: '',
+>>>>>>> ce1420a (Video analysis feature Fixed)
   })
 
   const load = useCallback(async () => {
@@ -40,6 +61,18 @@ export default function Detections() {
 
   const setFilter = (key, value) => { setPage(1); setFilters((f) => ({ ...f, [key]: value })) }
 
+<<<<<<< HEAD
+=======
+  const clearJobFilter = () => {
+    setPage(1)
+    setFilters((f) => ({ ...f, video_analysis_job_id: '' }))
+    const next = new URLSearchParams(searchParams)
+    next.delete('job_id')
+    next.delete('job_name')
+    setSearchParams(next)
+  }
+
+>>>>>>> ce1420a (Video analysis feature Fixed)
   const handleExport = () => {
     const header = ['Timestamp', 'Source', 'Camera', 'Location', 'Object', 'Category', 'Confidence', 'Duration(s)', 'Severity']
     const rows = items.map((d) => [
@@ -65,6 +98,20 @@ export default function Detections() {
         <p className="text-sm text-slate-500">Historical record of AI surveillance events.</p>
       </div>
 
+<<<<<<< HEAD
+=======
+      {filters.video_analysis_job_id && (
+        <div className="card flex items-center justify-between gap-3 py-3 border-brand-500/40 bg-brand-500/5">
+          <p className="text-sm text-slate-300">
+            Showing detections for <span className="font-medium text-slate-100">{jobName || `job #${filters.video_analysis_job_id}`}</span> only.
+          </p>
+          <button className="btn btn-secondary text-xs px-2 py-1 flex items-center gap-1" onClick={clearJobFilter}>
+            <X size={12} /> Clear
+          </button>
+        </div>
+      )}
+
+>>>>>>> ce1420a (Video analysis feature Fixed)
       <div className="card">
         <div className="card-title">Filters</div>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
